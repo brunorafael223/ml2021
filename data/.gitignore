@@ -1,0 +1,6 @@
+# Dataset Location (images, annotations, etc ...)
+*
+!.gitignore
+# add utk-split-files
+!UTKFace-Split/
+!UTKFace-Split/*

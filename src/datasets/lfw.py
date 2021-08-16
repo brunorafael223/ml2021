@@ -87,7 +87,7 @@ class Draw(object):
 
 class LFW:
 
-    def __init__(self, root = "../datasets/LFW", is_train=True):
+    def __init__(self, root = "../datasets/LFW", is_train=True, transform=None):
 
         # select file split
         n_split = "Train" if is_train else "Test"
@@ -132,6 +132,7 @@ class LFW:
         self.landmarks = landmarks[srange]
         self.rectangles = rectangles[srange]
         self.poses = poses[srange]
+        self.transform = transform
     
     def getPoseProjection(self, angles, T):
         f = 1000
@@ -151,6 +152,8 @@ class LFW:
     def show(self, index, show_landmarks=False, show_detection=False, 
         show_pose_box=False, show_pose_axis=False):
         image = Image.open(self.images["path"].iloc[index]).convert("RGB")
+        if self.transform:
+            image = self.transform(image)
         pose = self.poses[index]
         land = self.landmarks[index]
         rect = self.rectangles[index]
@@ -169,10 +172,13 @@ class LFW:
 
     def __getitem__(self, index):
         image = Image.open(self.images["path"].iloc[index]).convert("RGB")
+        if self.transform:
+            image = self.transform(image)
         pose = self.poses[index]
         land = self.landmarks[index]
         rect = self.rectangles[index]
-        return {"image":image, "pose": pose[:3], "rect":rect, "landmarks":land}
+        return {"image":image, "pose": pose[:3], "rect":rect, "landmarks":land,
+                    "T":pose[3:]}
 
     def __len__(self):
         return len(self.images)

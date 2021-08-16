@@ -28,8 +28,8 @@ class UTKFace(Dataset):
         f_split = 'UTK-age-'+n_split+'-filenames.txt'
         # f_split = os.path.join(root, 'UTK-'+n_split+'-filenames.txt')
         
-        cwd = os.path.abspath(os.path.dirname(__file__))
-        #print(cwd)
+        relp = "/../../data/UTKFace-Split/"
+        cwd = os.path.abspath(os.path.dirname(__file__)+relp)
         if not os.path.exists(f_split):
             f_split = os.path.join(cwd, f_split)
         
@@ -40,6 +40,7 @@ class UTKFace(Dataset):
         cols = ["age","gender","race", "datetime"]
         df = pd.DataFrame(lines, columns=["filenames"])
         df[cols] = df["filenames"].str.split("_", expand=True)
+        
         # exclude images with incomplete data 
         df = df.loc[~df["datetime"].isna()]
         df["datetime"] = df["datetime"].str.split(".",n=1, expand=True)[0]
