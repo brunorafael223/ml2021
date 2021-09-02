@@ -97,7 +97,8 @@ def read_pose_file(filepath):
 
 class LFW:
 
-    def __init__(self, root = "../datasets/LFW", is_train=True, transform=None):
+    def __init__(self, root = "../datasets/LFW", is_train=True, transform=None,
+        crop_roi=False):
 
         # select file split
         n_split = "Train" if is_train else "Test"
@@ -129,7 +130,8 @@ class LFW:
         poses.columns = ["alpha","beta","gamma","tx","ty","tz"]
 
         # Fix Gamma angle (Rx) discontinuity around -pi
-        poses[poses["gamma"] < 0] = poses[poses["gamma"] < 0] + 2*np.pi
+
+        poses["gamma"] += (poses["gamma"] < 0) *(2*np.pi)
         poses = poses.values
         #display(poses)
 
@@ -147,13 +149,14 @@ class LFW:
         self.rectangles = rectangles[srange]
         self.poses = poses[srange]
         self.transform = transform
+        self.crop_roi = crop_roi
     
     def getPoseProjection(self, angles, T):
         f = 1000
         a,b,g = angles[:3]    
         # Compute 3D Rotation Matrix
         Rx = np.array([[1,0,0],[0,cos(g),-sin(g)],[0,sin(g),cos(g)]])
-        Ry = np.array([[cos(b),0,sin(b)],[0,1,0],[sin(b),0,cos(b)]])
+        Ry = np.array([[cos(b),0,sin(b)],[0,1,0],[-sin(b),0,cos(b)]])
         Rz = np.array([[cos(a),-sin(a),0],[sin(a), cos(a),0],[0,0,1]])
         R  = Rz @ Ry @ Rx
         T  = T.reshape(3,1)
@@ -187,7 +190,11 @@ class LFW:
     def __getitem__(self, index):
         image = Image.open(self.images["path"].iloc[index]).convert("RGB")
         if self.transform:
+            if self.crop_roi:
+                rect = xyhw2xyxy(self.rectangles[index])
+                image = image.crop(rect)
             image = self.transform(image)
+            
         pose = self.poses[index]
         land = self.landmarks[index]
         rect = self.rectangles[index]

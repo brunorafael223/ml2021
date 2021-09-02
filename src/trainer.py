@@ -38,8 +38,8 @@ class Trainer(object):
                 history.append({"epoch":self.current_epoch, 
                     **train_stats,**test_stats})        
                 ch = history[-1]
-                progress.write(" | ".join([f"{c}: {ch[c]:2.5f}" for c in ch]))
-        except:
+                progress.write(" | ".join([f"{c}: {ch[c]:3.5f}" for c in ch]))
+        except KeyboardInterrupt:
             print("Stop training...")
         return history
 

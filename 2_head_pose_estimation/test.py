@@ -41,7 +41,7 @@ if __name__ == "__main__":
     valid_tform = tfm.Compose([
         tfm.Resize(image_size),
         tfm.ToTensor(),
-        tfm.Normalize(**norm)
+        # tfm.Normalize(**norm)
     ])
 
     params = dict(batch_size = args.batch_size, num_workers = args.num_workers)
@@ -56,7 +56,8 @@ if __name__ == "__main__":
             target = data["pose"].to(args.device)
             outputs = model(images).cpu()
 
-            images = (images.cpu()*unorm["std"]+unorm["mean"]).permute(0,2,3,1)*255
+            # images = (images.cpu()*unorm["std"]+unorm["mean"]).permute(0,2,3,1)*255
+            images = images.cpu().permute(0,2,3,1)*255
             images2 = []
             for i in range(images.size(0)):
                 img  = Image.fromarray(images[i].numpy().astype(np.uint8))
