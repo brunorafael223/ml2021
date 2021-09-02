@@ -85,6 +85,16 @@ class Draw(object):
         return image
 
 
+def read_pose_file(filepath):
+    with open(filepath,'r') as f:
+        data = f.readlines()
+    data_list = []
+    for d in data:
+        line = d.replace("\n","").split("  ")[1:]
+        data_list.append(list(map(float,line)))
+    return data_list
+
+
 class LFW:
 
     def __init__(self, root = "../datasets/LFW", is_train=True, transform=None):
@@ -112,8 +122,12 @@ class LFW:
         # load poses
         filepath = os.path.join(root, f"LFW-Poses.txt")
         assert os.path.exists(filepath), filepath
-        poses = pd.read_csv(filepath, **load_par, 
-            names=["alpha","beta","gamma","tx","ty","tz"])
+
+        # read pose file 
+        poses = read_pose_file(filepath)
+        poses = pd.DataFrame(poses)
+        poses.columns = ["alpha","beta","gamma","tx","ty","tz"]
+
         # Fix Gamma angle (Rx) discontinuity around -pi
         poses[poses["gamma"] < 0] = poses[poses["gamma"] < 0] + 2*np.pi
         poses = poses.values
